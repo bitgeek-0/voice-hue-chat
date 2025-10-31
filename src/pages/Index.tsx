@@ -1,118 +1,92 @@
-import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ChatHeader } from "@/components/ChatHeader";
-import { ChatMessage } from "@/components/ChatMessage";
-import { ChatInput } from "@/components/ChatInput";
-import { mockChatResponse } from "@/utils/mockApi";
+import { MessageSquare, Shield, Clock, Heart } from "lucide-react";
 
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  isLoading?: boolean;
-}
-
-const Index = () => {
+const Landing = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm your medical assistant. How can I help you today?",
-      isUser: false,
-    },
-  ]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Check authentication on mount
-  useEffect(() => {
+  const handleGetStarted = () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn !== "true") {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSendMessage = async (text: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      isUser: true,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsProcessing(true);
-
-    // Add loading message
-    const loadingMessage: Message = {
-      id: `${Date.now()}-loading`,
-      text: "",
-      isUser: false,
-      isLoading: true,
-    };
-    setMessages((prev) => [...prev, loadingMessage]);
-
-    try {
-      const response = await mockChatResponse(text);
-      
-      // Remove loading message and add actual response
-      setMessages((prev) => {
-        const filtered = prev.filter((msg) => !msg.isLoading);
-        return [
-          ...filtered,
-          {
-            id: Date.now().toString(),
-            text: response,
-            isUser: false,
-          },
-        ];
-      });
-    } catch (error) {
-      console.error("Error getting response:", error);
-      setMessages((prev) => {
-        const filtered = prev.filter((msg) => !msg.isLoading);
-        return [
-          ...filtered,
-          {
-            id: Date.now().toString(),
-            text: "Sorry, I encountered an error. Please try again.",
-            isUser: false,
-          },
-        ];
-      });
-    } finally {
-      setIsProcessing(false);
+    if (isLoggedIn === "true") {
+      navigate("/chat");
+    } else {
+      navigate("/auth");
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <ChatHeader />
-      
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto">
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message.text}
-              isUser={message.isUser}
-              isLoading={message.isLoading}
-            />
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10">
+      <div className="container mx-auto px-4 py-16">
+        {/* Header */}
+        <header className="text-center mb-16 animate-fade-in">
+          <div className="flex items-center justify-center mb-4">
+            <Heart className="w-12 h-12 text-primary mr-3" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Carely AI
+            </h1>
+          </div>
+          <p className="text-xl text-muted-foreground mt-4">
+            Your trusted medical assistant, available 24/7
+          </p>
+        </header>
+
+        {/* Hero Section */}
+        <section className="text-center mb-20 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          <h2 className="text-4xl font-bold mb-6 text-foreground">
+            Ask Your Medical Questions From Us
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Get reliable medical information and guidance instantly. Our AI-powered chatbot
+            is here to help you understand your health concerns better. Available anytime,
+            anywhere.
+          </p>
+          <Button 
+            onClick={handleGetStarted}
+            size="lg"
+            className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            Start Chatting Now
+          </Button>
+        </section>
+
+        {/* Features */}
+        <section className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            <MessageSquare className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">Instant Responses</h3>
+            <p className="text-muted-foreground">
+              Get immediate answers to your medical questions with our advanced AI technology.
+            </p>
+          </div>
+          
+          <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <Shield className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">Private & Secure</h3>
+            <p className="text-muted-foreground">
+              Your health information is kept confidential and secure with our encrypted platform.
+            </p>
+          </div>
+          
+          <div className="bg-card p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow animate-fade-in" style={{ animationDelay: "0.4s" }}>
+            <Clock className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">24/7 Availability</h3>
+            <p className="text-muted-foreground">
+              Access medical guidance whenever you need it, day or night, from anywhere.
+            </p>
+          </div>
+        </section>
+
+        {/* Disclaimer */}
+        <section className="mt-16 text-center max-w-3xl mx-auto">
+          <p className="text-sm text-muted-foreground italic">
+            <strong>Medical Disclaimer:</strong> This chatbot provides general health information
+            and should not replace professional medical advice, diagnosis, or treatment. Always
+            consult with a qualified healthcare provider for medical concerns.
+          </p>
+        </section>
       </div>
-      
-      <ChatInput onSendMessage={handleSendMessage} disabled={isProcessing} />
     </div>
   );
 };
 
-export default Index;
+export default Landing;
